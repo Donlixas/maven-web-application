@@ -1,46 +1,44 @@
 node{
-  def mavenHome = tool name: 'maven3.9.6'    
+  def mavenHome = tool name: 'maven3.9.6'
   stage('1.clonecode'){
-    git "https://github.com/LandmakTechnology/maven-web-application"
+    git "https://github.com/Donlixas/maven-web-application"
+    //git credentialsId: 'e8c5c949-7fb1-4d51-ae71-24000e7b0ddc', url: 'https://github.com/Donlixas/maven-web-app'
   }
   stage('2.mavenBuild'){
     sh "${mavenHome}/bin/mvn package"
   }
   stage('3.codeQualityAnalysis'){
-    sh "${mavenHome}/bin/mvn sonar:sonar"    
+    sh "${mavenHome}/bin/mvn sonar:sonar"
   }
- 
   stage('4.uploadArtifacts'){
-    sh "${mavenHome}/bin/mvn deploy"
+     sh "${mavenHome}/bin/mvn deploy"
   }
   stage('5.deploy2UAT'){
-      deploy adapters: [tomcat9(credentialsId: 'tomcat-credentials', path: '', url: 'http://3.144.85.2:8088/')], contextPath: null, war: 'target/*war'
-
+      deploy adapters: [tomcat9(credentialsId: 'Tomcat-credentials', path: '', url: 'http://3.133.97.181:8088/')], contextPath: null, war: 'target/*war'
   }
   stage('6.ManualApproval'){
-    sh " echo 'Please review & approve' "
-    timeout(time:300, unit:'MINUTES')
+      sh " echo 'Please review & approve' "
+      timeout(time:300, unit:'MINUTES')
     {
       input message: 'Application ready for deployment, Please review and approve'
     }
   }
   stage('7.deploy2prod'){
-          //use deploy to container plugin
-    deploy adapters: [tomcat9(credentialsId: 'tomcat-credentials', path: '', url: 'http://3.144.85.2:8088/')], contextPath: null, war: 'target/*war'
- 
+      //use deploy to container plugin
+      deploy adapters: [tomcat9(credentialsId: 'Tomcat-credentials', path: '', url: 'http://3.133.97.181:8088/')], contextPath: null, war: 'target/*war'
   }
-    stage('8.apm'){
-    sh "echo 'monitoring and observation and alerting' "
-    sh "echo 'application performance Monitoring in progress' "
+  stage('8.AppMonitering'){
+      sh "echo 'monitoring and observation and alerting' "
+      sh "echo 'application performance Monitoring in progress' "
   }
-  stage('9.notification'){
-    sh "echo create email notification to resolve any issue that may arise"
-    //use pipeline syntax and email notification plugin to achieve this  
-    emailext body: '''The build and Deployment status for tesla-webapp.
+  stage('9.Notification'){
+      sh "echo create email notification to resolve any issue that may arise"
+      //use pipeline syntax and email notification plugin to achieve this  
+      emailext body: '''The build and Deployment status for tesla-webapp
 
-Regards,
-Landmark Technologies''', recipientProviders: [developers(), upstreamDevelopers(), buildUser()], subject: 'job status', to: 'mylandmarktech@gmail.com'
-
+Regards
+Gideon
+Landmark Technologies''', recipientProviders: [developers(), upstreamDevelopers(), buildUser()], subject: 'Job status', to: 'gidydon@gmail.com'
   }
-
 }
+
